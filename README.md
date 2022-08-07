@@ -57,7 +57,7 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
 
     ```shell
     $ git clone https://github.com/cosmos/relayer.git
-    $ cd relayer && git checkout v2.0.0-rc3
+    $ cd relayer && git checkout v2.0.0
     $ make install
     ```
 
@@ -73,7 +73,7 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
    To customize the memo for all relaying, use the `--memo` flag when initializing the configuration.
 
    ```shell
-   $ rly config init --memo "My custom memo"
+   $ rly config init --memo "mesahin#3516"
    ```
 
    Custom memos will have `rly(VERSION)` appended. For example, a memo of `My custom memo` running on relayer version `v2.0.0` would result in a transaction memo of `My custom memo | rly(v2.0.0)`. 
@@ -100,8 +100,8 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
 
    To add the chain config files manually, example config files have been included [here](https://github.com/cosmos/relayer/tree/main/docs/example-configs/)
    ```shell
-   $ rly chains add --url https://raw.githubusercontent.com/cosmos/relayer/main/docs/example-configs/cosmoshub-4.json cosmoshub
-   $ rly chains add --url https://raw.githubusercontent.com/cosmos/relayer/main/docs/example-configs/osmosis-1.json osmosis
+   $ rly chains add --url https://raw.githubusercontent.com/mesahin001/relayer/main/configs/stride/chains/stride.json stride
+   $ rly chains add --url https://raw.githubusercontent.com/mesahin001/relayer/main/configs/stride/chains/gaia.json gaia
    ```
    
 4. **Import OR create new keys for the relayer to use when signing and relaying transactions.**
@@ -111,15 +111,15 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
    If you need to generate a new private key you can use the `add` subcommand.
 
     ```shell
-    $ rly keys add cosmoshub [key-name]  
-    $ rly keys add osmosis [key-name]  
+    $ rly keys add stride [key-name]  
+    $ rly keys add gaia [key-name]  
     ```
   
    If you already have a private key and want to restore it from your mnemonic you can use the `restore` subcommand.
 
    ```shell
-   $ rly keys restore cosmoshub [key-name] "mnemonic words here"
-   $ rly keys restore osmosis [key-name] "mnemonic words here"
+   $ rly keys restore stride [key-name] "mnemonic words here"
+   $ rly keys restore gaia [key-name] "mnemonic words here"
    ```
 
 5. **Edit the relayer's `key` values in the config file to match the `key-name`'s chosen above.**
@@ -131,7 +131,7 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
       - type: cosmos
          value:
          key: YOUR-KEY-NAME-HERE
-         chain-id: cosmoshub-4
+         chain-id: STRIDE-TESTNET-2
          rpc-addr: http://localhost:26657
       ```
 
@@ -143,8 +143,8 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
    You can query the balance of each configured key by running:  
 
    ```shell
-   $ rly q balance cosmoshub
-   $ rly q balance osmosis
+   $ rly q balance stride
+   $ rly q balance gaia
    ```
 
 7. **Configure path meta-data in config file.**
@@ -161,7 +161,12 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
      ```
    > **NOTE:** Don't see the path metadata for paths you want to relay on?   
    > Please open a PR to add this metadata to the GitHub repo!
+    <br>
+    You can add your own pathlist like this:
 
+```shell
+$ rly paths add-dir /root/relayer/configs/stride/paths/
+```
 8. #### **Configure the channel filter.**
    
    By default, the relayer will relay packets over all channels on a given connection.  
@@ -174,22 +179,26 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
    - empty value, which is the default setting, and tells the relayer to relay on all channels    
    <br>
    
-   Since we are only worried about the canonical channel between the Cosmos Hub and Osmosis our filter settings would look like the following.  
+   Since we are only worried about the canonical channel between the Stride and Gaia our filter settings would look like the following.  
    <br>
    Example:
    ```yaml
-   hubosmo:
-      src:
-          chain-id: cosmoshub-4
-          client-id: 07-tendermint-259
-          connection-id: connection-257
-      dst:
-          chain-id: osmosis-1
-          client-id: 07-tendermint-1
-          connection-id: connection-1
-      src-channel-filter:
-              rule: allowlist
-              channel-list: [channel-141]  
+   stride-gaia:
+        src:
+            chain-id: STRIDE-TESTNET-2
+            client-id: 07-tendermint-0
+            connection-id: connection-0
+        dst:
+            chain-id: GAIA
+            client-id: 07-tendermint-0
+            connection-id: connection-0
+        src-channel-filter:
+            rule: allowlist
+            channel-list:
+                - channel-0
+                - channel-1
+                - channel-3
+                - channel-4  
    ```
    
    >Because two channels between chains are tightly coupled, there is no need to specify the dst channels.
@@ -201,7 +210,7 @@ Additional information on how IBC works can be found [here](https://ibc.cosmos.n
 
      ```shell
      $ rly paths list
-     $ rly start [path]
+     $ rly start stride-gaia
      ```
    
     You will need to start a separate shell instance for each path you wish to relay over.
